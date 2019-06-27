@@ -8,6 +8,7 @@ namespace quepasa_api.Services
     public class ContactsService
     {
         private readonly IMongoCollection<Contact> _contacts;
+        private readonly IContactsDatabaseSettings _settings;
 
         public ContactsService(IContactsDatabaseSettings settings)
         {
@@ -15,6 +16,7 @@ namespace quepasa_api.Services
             var database = client.GetDatabase(settings.DatabaseName);
 
             _contacts = database.GetCollection<Contact>(settings.ContactsCollectionName);
+            _settings = settings;
         }
 
         public List<Contact> Get()
@@ -22,8 +24,10 @@ namespace quepasa_api.Services
             return _contacts.Find(c => true).ToList();
         }
 
-        public Contact Get(string id) =>
-            _contacts.Find<Contact>(c => c.Id == id).FirstOrDefault();
+        public Contact Get(string id)
+        {
+            return _contacts.Find<Contact>(c => c.Id == id).FirstOrDefault();
+        }
 
         public Contact Create(Contact c)
         {
@@ -41,8 +45,10 @@ namespace quepasa_api.Services
             _contacts.ReplaceOne(c => c.Id == id, newContact);
         }
 
-        public void Remove(Contact c) =>
+        public void Remove(Contact c)
+        {
             _contacts.DeleteOne(contact => contact.Id == c.Id);
+        }
 
         public void Remove(string id)
         {
@@ -52,7 +58,7 @@ namespace quepasa_api.Services
         public void AssociateOneToOne(string sourceContactId, string targetContactId)
         {
             var filter = Builders<Contact>.Filter.Eq("_id", targetContactId);
-            var update = Builders<Contact>.Update.Set("RelatedPerson", new MongoDBRef("Contacts", sourceContactId));
+            var update = Builders<Contact>.Update.Set("RelatedPerson", new MongoDBRef(_settings.ContactsCollectionName, sourceContactId));
 
             _contacts.UpdateOne(filter, update);
         }

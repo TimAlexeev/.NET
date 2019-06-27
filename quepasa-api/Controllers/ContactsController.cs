@@ -75,8 +75,8 @@ namespace quepasa_api.Controllers
             return NoContent();
         }
 
-        [HttpGet("{sourceContactId}/{targetContactId}")]
-        public IActionResult Associate([FromQuery()] string sourceContactId, [FromQuery()] string targetContactId)
+        [HttpGet("associatePerson")]
+        public IActionResult AssociatePerson(string sourceContactId, string targetContactId)
         {
             _contactsService.AssociateOneToOne(sourceContactId, targetContactId);
 
