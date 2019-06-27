@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using quepasa_api.Models;
+using quepasa_api.Services;
 
 namespace quepasa_api
 {
@@ -25,6 +27,13 @@ namespace quepasa_api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<ContactsDatabaseSettings>(Configuration.GetSection(nameof(ContactsDatabaseSettings)));
+
+            services.AddSingleton<IContactsDatabaseSettings>(sp =>
+                sp.GetRequiredService<IOptions<ContactsDatabaseSettings>>().Value);
+
+            services.AddSingleton<ContactsService>();
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 

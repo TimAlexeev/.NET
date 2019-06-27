@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
+using quepasa_api.Models;
+using quepasa_api.Services;
 
 namespace quepasa_api.Controllers
 {
@@ -11,36 +9,78 @@ namespace quepasa_api.Controllers
     [ApiController]
     public class ContactsController : ControllerBase
     {
-        // GET api/values
-        [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
+        private readonly ContactsService _contactsService;
+
+        public ContactsController(ContactsService contactsService)
         {
-            return new string[] { "value1", "value2" };
+            _contactsService = contactsService;
+        }
+
+        // GET api/contacts
+        [HttpGet(Name = "GetAllContacts")]
+        public ActionResult<List<Contact>> Get()
+        {
+            return _contactsService.Get();
         }
 
         // GET api/contacts/5
-        [HttpGet("{id}")]
-        public ActionResult<string> Get(int id)
+        [HttpGet("{id:length(24)}", Name = "GetContact")]
+        public ActionResult<Contact> Get(string id)
         {
-            return "value";
+            var contact = _contactsService.Get(id);
+
+            if (contact == null)
+            {
+                return NotFound();
+            }
+
+            return contact;
         }
 
-        // POST api/values
         [HttpPost]
-        public void Post([FromBody] string value)
+        public ActionResult<Contact> Create (Contact newContact)
         {
+            _contactsService.Create(newContact);
+
+            return CreatedAtRoute("GetContact", new { id = newContact.Id.ToString() }, newContact);
         }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut("{id:length(24)}")]
+        public IActionResult Update(string id, Contact c)
         {
+            var book = _contactsService.Get(id);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            _contactsService.Update(id, c);
+
+            return NoContent();
         }
 
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("{id:length(24)}")]
+        public IActionResult Delete(string id)
         {
+            var contact = _contactsService.Get(id);
+
+            if (contact == null)
+            {
+                return NotFound();
+            }
+
+            _contactsService.Remove(contact.Id);
+
+            return NoContent();
+        }
+
+        [HttpGet("{sourceContactId}/{targetContactId}")]
+        public IActionResult Associate([FromQuery()] string sourceContactId, [FromQuery()] string targetContactId)
+        {
+            _contactsService.AssociateOneToOne(sourceContactId, targetContactId);
+
+            return NoContent();
         }
     }
 }
