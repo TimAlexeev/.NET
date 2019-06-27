@@ -48,9 +48,9 @@ namespace quepasa_api.Controllers
         [HttpPut("{id:length(24)}")]
         public IActionResult Update(string id, Contact c)
         {
-            var book = _contactsService.Get(id);
+            var contactToUpdate = _contactsService.Get(id);
 
-            if (book == null)
+            if (contactToUpdate == null)
             {
                 return NotFound();
             }

@@ -56,12 +56,5 @@ namespace quepasa_api.Services
 
             _contacts.UpdateOne(filter, update);
         }
-
-        //public void AssociateManyToOne(Contact sourceContact, Contact targetContact)
-        //{
-        //    var contactToUpdate = Get(targetContact.Id);
-        //    var updateDef = Builders<Contact>.Update.Set(o => o.RelatedPerson, sourceContact);
-        //    _contacts.UpdateOne(c => c.Id == targetContact.Id, updateDef);
-        //}
     }
 }
